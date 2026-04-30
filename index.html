@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>STUDIO TODO — honake</title>
+  <meta name="description" content="STUDIO TODO — honake. Fullstack Engineer / Planner. Personal works and projects." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #13171f;
+      --bg-2: #1a1e26;
+      --fg: #f0f4f8;
+      --fg-dim: #8b9ab0;
+      --fg-faint: #3d495c;
+      --line: #2a3342;
+      --accent: oklch(0.80 0.14 75);
+      /* warm amber */
+      --accent-dim: oklch(0.55 0.10 75);
+      --sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+      min-height: 100svh;
+    }
+
+    /* subtle grain background using SVG noise */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: 0.45;
+      mix-blend-mode: overlay;
+    }
+
+    /* very faint vertical grid */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 80px 100%;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 48px) 96px;
+    }
+
+    /* ===== Top bar ===== */
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-faint);
+      padding-bottom: 24px;
+    }
+
+    .top .left {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px oklch(0.80 0.14 75 / 0.6);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.45;
+        transform: scale(0.85);
+      }
+    }
+
+    .top .right {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .top .right span {
+      white-space: nowrap;
+    }
+
+    /* sound toggle */
+    .snd {
+      appearance: none;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--fg-faint);
+      font: inherit;
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .snd:hover {
+      color: var(--fg);
+      border-color: var(--fg-dim);
+    }
+
+    .snd[data-on="true"] {
+      color: var(--accent);
+      border-color: var(--accent-dim);
+    }
+
+    .snd .ind {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.55;
+    }
+
+    .snd[data-on="true"] .ind {
+      opacity: 1;
+      box-shadow: 0 0 8px oklch(0.80 0.14 75 / 0.7);
+    }
+
+    /* ===== Hero / logo ===== */
+    .hero {
+      padding: clamp(56px, 10vw, 110px) 0 clamp(40px, 8vw, 80px);
+      display: grid;
+      gap: clamp(24px, 4vw, 36px);
+      justify-items: center;
+      text-align: center;
+    }
+
+    .logo-wrap {
+      width: clamp(160px, 26vw, 220px);
+      aspect-ratio: 1 / 1;
+      position: relative;
+      cursor: default;
+      perspective: 800px;
+    }
+
+    .logo-wrap img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      transform: translate3d(var(--lx, 0px), var(--ly, 0px), 0) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
+      transition: transform 0.25s cubic-bezier(.2, .7, .2, 1);
+      filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.04));
+    }
+
+    /* ASCII halo when hovered */
+    .logo-wrap::after {
+      content: "";
+      position: absolute;
+      inset: -6%;
+      border: 1px dashed var(--fg-faint);
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .logo-wrap:hover::after {
+      opacity: 1;
+    }
+
+    .intro {
+      display: grid;
+      gap: 18px;
+      max-width: 640px;
+      justify-items: center;
+    }
+
+    .intro h1 {
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: clamp(28px, 4.4vw, 44px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0;
+      text-wrap: balance;
+    }
+
+    .intro h1 .accent {
+      color: var(--accent);
+    }
+
+    .intro h1 .caret {
+      display: inline-block;
+      width: 0.55ch;
+      height: 1em;
+      background: var(--accent);
+      vertical-align: -0.12em;
+      margin-left: 0.15ch;
+      animation: blink 1.05s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--fg-dim);
+      font-size: clamp(15px, 1.6vw, 17px);
+      line-height: 1.65;
+      max-width: 56ch;
+      text-wrap: pretty;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 24px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+      margin-top: 4px;
+    }
+
+    .meta a {
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--fg-faint);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .meta a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .meta .k {
+      color: var(--fg-faint);
+      margin-right: 6px;
+    }
+
+    .meta-bottom {
+      justify-content: flex-start;
+      margin-top: 6px;
+      gap: 8px 28px;
+      font-size: 13px;
+    }
+
+    /* ===== Section header ===== */
+    .section-h {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      margin-top: clamp(40px, 6vw, 64px);
+      margin-bottom: 20px;
+    }
+
+    .section-h .label {
+      color: var(--accent);
+      letter-spacing: 0.04em;
+    }
+
+    .section-h .count {
+      color: var(--fg-faint);
+    }
+
+    /* ===== Project rows ===== */
+    .projects {
+      display: grid;
+      gap: 0;
+    }
+
+    .project {
+      display: grid;
+      grid-template-columns: 96px 1fr auto;
+      gap: clamp(16px, 3vw, 28px);
+      padding: clamp(18px, 3vw, 22px) 0;
+      border-bottom: 1px solid var(--line);
+      align-items: stretch;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      isolation: isolate;
+      transition: padding-left 0.25s ease;
+    }
+
+    .project::before {
+      content: "";
+      position: absolute;
+      left: -16px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .project:hover::before {
+      transform: scaleY(1);
+    }
+
+    .project:hover {
+      padding-left: 8px;
+    }
+
+    .project[data-disabled="true"] {
+      cursor: default;
+      opacity: 0.78;
+    }
+
+    .project[data-disabled="true"]:hover {
+      padding-left: 0;
+    }
+
+    .project[data-disabled="true"]:hover::before {
+      transform: scaleY(0);
+    }
+
+    /* thumbnail (placeholder) */
+    .thumb {
+      width: 96px;
+      height: 72px;
+      border-radius: 4px;
+      position: relative;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.055), transparent 48%),
+        var(--bg-2);
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .thumb[data-placeholder="true"] {
+      background: var(--bg-2);
+    }
+
+    /* striped placeholder + small label */
+    .thumb[data-placeholder="true"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(135deg,
+          transparent 0 6px,
+          rgba(255, 255, 255, 0.03) 6px 7px);
+    }
+
+    .thumb[data-placeholder="true"]::after {
+      content: attr(data-label);
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--fg-faint);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .thumb img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.28));
+      border-radius: 6px;
+      position: relative;
+      z-index: 1;
+      transform: translate(var(--icon-x, 0), var(--icon-y, 0));
+    }
+
+    .thumb[data-favicon="true"] img {
+      image-rendering: auto;
+    }
+
+    .thumb[data-placeholder="true"] img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+      filter: none;
+    }
+
+    .info {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+      align-content: center;
+    }
+
+    .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-faint);
+      letter-spacing: 0.06em;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: clamp(17px, 2.2vw, 19px);
+      letter-spacing: -0.005em;
+      color: var(--fg);
+      margin: 0;
+    }
+
+    .url {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-faint);
+    }
+
+    .desc {
+      color: var(--fg-dim);
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 60ch;
+      margin: 0;
+      text-wrap: pretty;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--fg-faint);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .tags span::before {
+      content: "·  ";
+      color: var(--fg-faint);
+    }
+
+    .tags span:first-child::before {
+      content: "";
+    }
+
+    .arrow {
+      align-self: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--fg-faint);
+      transition: transform 0.25s ease, color 0.25s ease;
+    }
+
+    .project:hover .arrow {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .project[data-disabled="true"] .arrow {
+      color: var(--fg-faint);
+    }
+
+    .project[data-disabled="true"]:hover .arrow {
+      transform: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      border: 1px solid var(--accent-dim);
+      border-radius: 999px;
+      padding: 2px 8px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .badge::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px oklch(0.80 0.14 75 / 0.7);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @media (max-width: 600px) {
+      .project {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .thumb {
+        width: 64px;
+        height: 64px;
+      }
+
+      .thumb img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .arrow {
+        display: none;
+      }
+
+      .desc {
+        font-size: 13.5px;
+      }
+
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      margin-top: clamp(40px, 6vw, 64px);
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-faint);
+    }
+
+    footer .right {
+      display: inline-flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    footer kbd {
+      font-family: var(--mono);
+      font-size: 10px;
+      border: 1px solid var(--line);
+      border-bottom-width: 2px;
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--fg-dim);
+      background: var(--bg-2);
+    }
+
+    /* ===== Help overlay ===== */
+    .help-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .help-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .help-card {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 24px 28px;
+      min-width: min(340px, 90vw);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+    }
+
+    .help-card h3 {
+      margin: 0 0 14px;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .help-card .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .help-card .row:last-child {
+      border-bottom: 0;
+    }
+
+    .help-card kbd {
+      font-family: var(--mono);
+      border: 1px solid var(--line);
+      border-bottom-width: 2px;
+      border-radius: 3px;
+      padding: 1px 6px;
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    /* reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <main>
+    <!-- ===== Top bar ===== -->
+    <header class="top" aria-label="status">
+      <span class="left">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="clock" aria-live="off">--:--:-- JST</span>
+      </span>
+      <span class="right">
+        <button class="snd" id="sndBtn" type="button" aria-pressed="false" data-on="false" title="sound on/off">
+          <span class="ind" aria-hidden="true"></span>
+          <span id="sndLabel">sound off</span>
+        </button>
+      </span>
+    </header>
+
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+      <div class="logo-wrap" id="logoWrap" aria-hidden="false">
+        <img src="assets/logo.png" alt="STUDIO TODO logo" id="logo" draggable="false" />
+      </div>
+
+      <div class="intro">
+        <h1>
+          <span id="hello">Hello,</span> I&rsquo;m <span class="accent">honake</span>.<span class="caret"
+            aria-hidden="true"></span>
+        </h1>
+      </div>
+
+    </section>
+
+    <!-- ===== Projects: Live ===== -->
+    <div class="section-h">
+      <span class="label">// LIVE</span>
+      <span class="count">02</span>
+    </div>
+
+    <section class="projects" aria-label="Live services">
+      <a class="project" href="https://www.seichi-map.com/" target="_blank" rel="noopener noreferrer" data-sfx="row">
+        <div class="thumb" data-label="seichi-map" data-favicon="true">
+          <img src="assets/seichi-favicon.ico" alt="seichi-map favicon" />
+        </div>
+        <div class="info">
+          <span class="num">/01 · web app</span>
+          <div class="title-row">
+            <h2 class="title">SeichiMap - 聖地マップ</h2>
+            <span class="url">seichi-map.com ↗</span>
+          </div>
+          <p class="desc">近所のコンテンツ聖地を探せる地図アプリ。アニメや漫画の舞台になった場所を、地図上から発見できます。</p>
+          <div class="tags">
+            <span>map</span><span>discovery</span><span>web</span>
+          </div>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a class="project" href="https://www.dictation-of-the-day.com/" target="_blank" rel="noopener noreferrer"
+        data-sfx="row">
+        <div class="thumb" data-label="dictation" data-favicon="true" style="--icon-x: -2px;">
+          <img src="assets/dictation-favicon.svg" alt="dictation favicon" />
+        </div>
+        <div class="info">
+          <span class="num">/02 · web game</span>
+          <div class="title-row">
+            <h2 class="title">Dictation of the Day</h2>
+            <span class="url">dictation-of-the-day.com ↗</span>
+          </div>
+          <p class="desc">英語のディクテーション × タイピングゲーム。毎日のリスニング練習を、ゲーム感覚で続けられます。</p>
+          <div class="tags">
+            <span>english</span><span>typing</span><span>daily</span>
+          </div>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </section>
+
+    <!-- ===== Projects: In Development ===== -->
+    <div class="section-h">
+      <span class="label">// WIP</span>
+      <span class="count">01</span>
+    </div>
+
+    <section class="projects" aria-label="In development">
+      <div class="project" data-disabled="true" role="group" aria-label="KOTOBA SNIPER" data-sfx="row-locked">
+        <div class="thumb" data-placeholder="true" data-label="kotoba">
+          <!-- replace with: <img src="assets/kotoba-sniper.png" alt="" /> -->
+        </div>
+        <div class="info">
+          <span class="num">/03 · game</span>
+          <div class="title-row">
+            <h2 class="title">KOTOBA SNIPER</h2>
+            <span class="badge">WIP</span>
+          </div>
+          <p class="desc">概念を撃ち抜く、水平思考ワードゲーム。ヒントから一つの&ldquo;ことば&rdquo;を狙い撃つ、新感覚パズル。</p>
+          <div class="tags">
+            <span>game</span><span>wordplay</span><span>lateral-thinking</span>
+          </div>
+        </div>
+        <span class="arrow" aria-hidden="true">·</span>
+      </div>
+    </section>
+
+    <!-- ===== Social links ===== -->
+    <div class="section-h">
+      <span class="label">// CONTACT</span>
+      <span class="count">02</span>
+    </div>
+    <nav class="meta meta-bottom" aria-label="social links">
+      <a href="https://x.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">x / @honake ↗</a>
+      <a href="https://github.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">github / @honake
+        ↗</a>
+    </nav>
+
+    <!-- ===== Footer ===== -->
+    <footer>
+      <span>© <span id="year">2026</span> STUDIO TODO</span>
+      <span class="right">
+        <span><kbd>?</kbd></span>
+      </span>
+    </footer>
+  </main>
+
+  <!-- ===== Help overlay ===== -->
+  <div class="help-overlay" id="help" role="dialog" aria-modal="true" aria-label="keyboard shortcuts">
+    <div class="help-card">
+      <h3>// keyboard</h3>
+      <div class="row"><span>seichi map</span><kbd>1</kbd></div>
+      <div class="row"><span>dictation</span><kbd>2</kbd></div>
+      <div class="row"><span>kotoba sniper</span><kbd>3</kbd></div>
+      <div class="row"><span>github</span><kbd>g</kbd></div>
+      <div class="row"><span>x / twitter</span><kbd>x</kbd></div>
+      <div class="row"><span>close</span><kbd>esc</kbd></div>
+    </div>
+  </div>
+
+  <script>
+    // ----- year -----
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ----- JST clock -----
+    (function () {
+      const el = document.getElementById('clock');
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function tick() {
+        const now = new Date();
+        // Convert to JST regardless of viewer timezone
+        const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+        el.textContent = `${pad(jst.getHours())}:${pad(jst.getMinutes())}:${pad(jst.getSeconds())} JST`;
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+
+    // ----- "Hello," / "こんにちは," / "안녕," cycler (subtle) -----
+    (function () {
+      const el = document.getElementById('hello');
+      const phrases = ['Hello,', 'こんにちは,', 'やあ,', 'Hi,'];
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % phrases.length;
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.textContent = phrases[i];
+          el.style.opacity = '1';
+        }, 220);
+      }, 4200);
+      el.style.transition = 'opacity 0.22s ease';
+      el.style.display = 'inline-block';
+    })();
+
+    // ----- logo drift -----
+    (function () {
+      const wrap = document.getElementById('logoWrap');
+      if (!wrap) return;
+      wrap.addEventListener('mousemove', (e) => {
+        const rect = wrap.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        wrap.style.setProperty('--lx', `${x * 5}px`);
+        wrap.style.setProperty('--ly', `${y * 5}px`);
+        wrap.style.setProperty('--rx', `${x * 9}deg`);
+        wrap.style.setProperty('--ry', `${y * -9}deg`);
+      });
+      wrap.addEventListener('mouseleave', () => {
+        ['--lx', '--ly', '--rx', '--ry'].forEach(prop => wrap.style.removeProperty(prop));
+      });
+    })();
+
+
+    // ----- WebAudio SFX (game-y bleeps) -----
+    const SFX = (function () {
+      const KEY = 'studio_todo_sound';
+      // default ON; only off if explicitly set to '0'
+      let on = localStorage.getItem(KEY) !== '0';
+      let ctx = null;
+      let master = null;
+
+      function ensure() {
+        if (ctx) return;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        ctx = new AC();
+        master = ctx.createGain();
+        master.gain.value = 0.18;
+        master.connect(ctx.destination);
+      }
+
+      // generic blip
+      function blip({ freq = 880, dur = 0.06, type = 'square', sweep = 0, vol = 1, delay = 0 } = {}) {
+        if (!on) return;
+        ensure();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        const t0 = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t0);
+        if (sweep) osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq + sweep), t0 + dur);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(vol, t0 + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(g).connect(master);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      }
+
+      // tiny noise burst (for "locked" / error)
+      function noise({ dur = 0.08, vol = 0.4 } = {}) {
+        if (!on) return;
+        ensure();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        const t0 = ctx.currentTime;
+        const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const g = ctx.createGain();
+        g.gain.value = vol;
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'bandpass';
+        filt.frequency.value = 1200;
+        filt.Q.value = 0.6;
+        src.connect(filt).connect(g).connect(master);
+        src.start(t0);
+        src.stop(t0 + dur);
+      }
+
+      // recipes
+      const sounds = {
+        hover: () => blip({ freq: 1320, dur: 0.035, type: 'square', vol: 0.35 }),
+        row: () => blip({ freq: 880, dur: 0.05, type: 'square', vol: 0.5 }),
+        'row-locked': () => { noise({ dur: 0.06, vol: 0.3 }); },
+        link: () => blip({ freq: 1760, dur: 0.04, type: 'triangle', vol: 0.4 }),
+        click: () => {
+          blip({ freq: 660, dur: 0.06, type: 'square', sweep: 360, vol: 0.6 });
+          blip({ freq: 1320, dur: 0.06, type: 'square', vol: 0.45, delay: 0.06 });
+        },
+        logo: () => {
+          // arpeggio
+          blip({ freq: 880, dur: 0.06, type: 'triangle', vol: 0.4 });
+          blip({ freq: 1175, dur: 0.06, type: 'triangle', vol: 0.4, delay: 0.07 });
+          blip({ freq: 1760, dur: 0.10, type: 'triangle', vol: 0.4, delay: 0.14 });
+        },
+        toggleOn: () => { blip({ freq: 660, dur: 0.05, type: 'square', vol: 0.5 }); blip({ freq: 1320, dur: 0.07, type: 'square', vol: 0.5, delay: 0.06 }); },
+        toggleOff: () => { blip({ freq: 1320, dur: 0.05, type: 'square', vol: 0.5 }); blip({ freq: 660, dur: 0.07, type: 'square', vol: 0.4, delay: 0.06 }); },
+        key: () => blip({ freq: 1480, dur: 0.025, type: 'square', vol: 0.3 }),
+      };
+
+      function play(name) { const fn = sounds[name]; if (fn) fn(); }
+      function isOn() { return on; }
+      function set(v) { on = !!v; localStorage.setItem(KEY, on ? '1' : '0'); }
+      return { play, isOn, set, ensure };
+    })();
+
+    // sound toggle button
+    (function () {
+      const btn = document.getElementById('sndBtn');
+      const label = document.getElementById('sndLabel');
+      function render() {
+        const on = SFX.isOn();
+        btn.dataset.on = on ? 'true' : 'false';
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? 'sound on' : 'sound off';
+      }
+      render();
+      btn.addEventListener('click', () => {
+        const next = !SFX.isOn();
+        SFX.set(next);
+        SFX.ensure();
+        render();
+        SFX.play(next ? 'toggleOn' : 'toggleOff');
+      });
+      btn.addEventListener('mouseenter', () => SFX.play('hover'));
+    })();
+
+    // wire row + link sfx
+    (function () {
+      document.querySelectorAll('[data-sfx]').forEach(el => {
+        const kind = el.dataset.sfx;
+        el.addEventListener('mouseenter', () => SFX.play('hover'));
+        el.addEventListener('click', (e) => {
+          SFX.play(kind);
+        });
+      });
+      // logo arpeggio on hover
+      const wrap = document.getElementById('logoWrap');
+      let armed = true;
+      wrap.addEventListener('mouseenter', () => {
+        if (!armed) return;
+        armed = false;
+        SFX.play('logo');
+        setTimeout(() => armed = true, 600);
+      });
+      wrap.addEventListener('click', () => SFX.play('logo'));
+    })();
+
+    // ----- Keyboard shortcuts -----
+    (function () {
+      const help = document.getElementById('help');
+      const links = {
+        '1': 'https://www.seichi-map.com/',
+        '2': 'https://www.dictation-of-the-day.com/',
+        'g': 'https://github.com/honake',
+        'x': 'https://x.com/honake',
+      };
+      document.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const tag = (e.target && e.target.tagName) || '';
+        if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+
+        if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+          e.preventDefault();
+          SFX.play('key');
+          help.classList.toggle('open');
+          return;
+        }
+        if (e.key === 'Escape') {
+          if (help.classList.contains('open')) SFX.play('key');
+          help.classList.remove('open');
+          return;
+        }
+        const k = e.key.toLowerCase();
+        if (links[k]) {
+          SFX.play('click');
+          window.open(links[k], '_blank', 'noopener,noreferrer');
+          return;
+        }
+        if (k === '3') {
+          SFX.play('row-locked');
+          const el = document.querySelectorAll('.project')[2];
+          if (el) {
+            el.animate(
+              [{ background: 'rgba(255,255,255,0.06)' }, { background: 'transparent' }],
+              { duration: 600, easing: 'ease-out' }
+            );
+          }
+        }
+      });
+      help.addEventListener('click', () => help.classList.remove('open'));
+    })();
+  </script>
+</body>
+
+</html>
