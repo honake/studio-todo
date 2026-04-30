@@ -17,11 +17,12 @@
       --bg-2: #1a1e26;
       --fg: #f0f4f8;
       --fg-dim: #8b9ab0;
-      --fg-faint: #3d495c;
-      --line: #2a3342;
+      --fg-faint: #65758d;
+      --line: #354053;
       --accent: oklch(0.80 0.14 75);
       /* warm amber */
       --accent-dim: oklch(0.55 0.10 75);
+      --rose: oklch(0.70 0.16 338);
       --sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
       --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
@@ -52,6 +53,26 @@
       text-rendering: optimizeLegibility;
       overflow-x: hidden;
       min-height: 100svh;
+    }
+
+    body[data-mode="music"] {
+      --accent: oklch(0.78 0.14 188);
+      --accent-dim: oklch(0.54 0.10 188);
+    }
+
+    body[data-mode="works"] {
+      --accent: oklch(0.80 0.14 75);
+      --accent-dim: oklch(0.55 0.10 75);
+    }
+
+    body[data-mode="about"] {
+      --accent: oklch(0.74 0.13 145);
+      --accent-dim: oklch(0.52 0.09 145);
+    }
+
+    body[data-mode="card"] {
+      --accent: oklch(0.74 0.18 338);
+      --accent-dim: oklch(0.52 0.12 338);
     }
 
     /* subtle grain background using SVG noise */
@@ -180,15 +201,17 @@
 
     /* ===== Hero / logo ===== */
     .hero {
-      padding: clamp(56px, 10vw, 110px) 0 clamp(40px, 8vw, 80px);
+      min-height: calc(100svh - 84px);
+      padding: clamp(28px, 5vw, 56px) 0 clamp(28px, 5vw, 56px);
       display: grid;
-      gap: clamp(24px, 4vw, 36px);
+      gap: clamp(18px, 3vw, 28px);
       justify-items: center;
       text-align: center;
+      align-content: center;
     }
 
     .logo-wrap {
-      width: clamp(160px, 26vw, 220px);
+      width: clamp(112px, 16vw, 160px);
       aspect-ratio: 1 / 1;
       position: relative;
       cursor: default;
@@ -222,7 +245,7 @@
 
     .intro {
       display: grid;
-      gap: 18px;
+      gap: 12px;
       max-width: 640px;
       justify-items: center;
     }
@@ -230,7 +253,7 @@
     .intro h1 {
       font-family: var(--sans);
       font-weight: 500;
-      font-size: clamp(28px, 4.4vw, 44px);
+      font-size: clamp(24px, 3.8vw, 38px);
       line-height: 1.1;
       letter-spacing: -0.02em;
       margin: 0;
@@ -264,6 +287,327 @@
       line-height: 1.65;
       max-width: 56ch;
       text-wrap: pretty;
+    }
+
+    @keyframes errorShake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-4px);
+      }
+
+      40% {
+        transform: translateX(4px);
+      }
+
+      60% {
+        transform: translateX(-2px);
+      }
+
+      80% {
+        transform: translateX(2px);
+      }
+    }
+
+    .terminal.error-shake {
+      animation: errorShake 0.3s cubic-bezier(.36, .07, .19, .97) both;
+      border-color: color-mix(in oklch, var(--rose), var(--accent) 50%);
+    }
+
+    .terminal {
+      width: min(760px, 100%);
+      border: 1px solid color-mix(in oklch, var(--line), var(--accent) 20%);
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, oklch(0.35 0.04 250 / 0.18), transparent 34%),
+        color-mix(in oklch, var(--bg-2), black 2%);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .screen-stage {
+      width: min(760px, 100%);
+      display: grid;
+      text-align: left;
+      font-family: var(--mono);
+    }
+
+    .screen-panel {
+      grid-area: 1 / 1;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, oklch(0.35 0.04 250 / 0.16), transparent 36%),
+        color-mix(in oklch, var(--bg-2), black 4%);
+      min-height: 260px;
+      padding: clamp(16px, 3vw, 22px);
+      opacity: 0;
+      transform: translateY(8px) scale(0.99);
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      overflow: hidden;
+    }
+
+    .screen-panel.is-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .screen-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+
+    .screen-title span:last-child {
+      color: var(--fg-faint);
+      font-size: 10px;
+    }
+
+    .screen-copy {
+      color: color-mix(in oklch, var(--fg), var(--fg-dim) 58%);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.8;
+      max-width: 62ch;
+      margin: 0;
+      text-wrap: pretty;
+    }
+
+    .screen-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .work-entry {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      color: inherit;
+      text-decoration: none;
+      border: 1px solid color-mix(in oklch, var(--line), var(--accent) 8%);
+      border-radius: 6px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .work-entry:hover,
+    .work-entry:focus-visible {
+      transform: translateX(4px);
+      border-color: var(--accent-dim);
+      background: rgba(255, 255, 255, 0.035);
+      outline: none;
+    }
+
+    .work-entry img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 5px;
+      transform: translate(var(--icon-x, 0), var(--icon-y, 0));
+    }
+
+    .work-entry .thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      font-size: 0;
+    }
+
+    .work-entry .thumb[data-placeholder="true"]::after {
+      font-size: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .work-entry strong {
+      display: block;
+      color: var(--fg);
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .work-entry small {
+      color: color-mix(in oklch, var(--fg-dim), var(--fg) 16%);
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+
+    .work-entry .go {
+      color: var(--fg-faint);
+      transition: transform 0.18s ease, color 0.18s ease;
+    }
+
+    .work-entry:hover .go {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px 18px;
+      color: color-mix(in oklch, var(--fg-dim), var(--fg) 16%);
+      font-size: 12px;
+      line-height: 1.7;
+      margin-top: 18px;
+    }
+
+    .kv dt {
+      color: var(--fg-faint);
+    }
+
+    .kv dd {
+      margin: 0;
+    }
+
+    .kv a,
+    .screen-copy a {
+      color: color-mix(in oklch, var(--accent), var(--fg) 18%);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in oklch, var(--accent-dim), transparent 28%);
+      transition: color 0.18s, border-color 0.18s;
+    }
+
+    .kv a:hover,
+    .screen-copy a:hover {
+      color: var(--fg);
+      border-color: var(--accent);
+    }
+
+    .about-stack {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .about-note {
+      border: 1px solid color-mix(in oklch, var(--line), var(--accent) 10%);
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.025);
+      color: color-mix(in oklch, var(--fg-dim), var(--fg) 18%);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .about-note strong {
+      display: block;
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .legacy-content {
+      display: none;
+    }
+
+    .terminal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--fg-faint);
+      letter-spacing: 0.04em;
+    }
+
+    .terminal-head span:last-child {
+      color: var(--accent);
+    }
+
+    .terminal-log {
+      min-height: 74px;
+      padding: 13px 14px 5px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .terminal-line {
+      min-height: 1.45em;
+    }
+
+    .terminal-line strong {
+      color: var(--fg);
+      font-weight: 400;
+    }
+
+    .terminal-form {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 5px 14px 14px;
+    }
+
+    .prompt {
+      color: var(--accent);
+    }
+
+    .command-input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--fg);
+      font: inherit;
+      letter-spacing: 0.02em;
+      caret-color: var(--accent);
+    }
+
+    .command-input::placeholder {
+      color: color-mix(in oklch, var(--fg-faint), transparent 22%);
+    }
+
+    .command-help {
+      padding: 0 14px 13px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--fg-faint);
+      font: inherit;
+      font-size: 10.5px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: color 0.18s, border-color 0.18s, transform 0.18s;
+    }
+
+    .chip:hover,
+    .chip:focus-visible {
+      color: var(--fg);
+      border-color: var(--accent-dim);
+      transform: translateY(-1px);
+      outline: none;
     }
 
     .meta {
@@ -364,6 +708,13 @@
 
     .project:hover {
       padding-left: 8px;
+    }
+
+    .project:hover .quest,
+    .project:focus-visible .quest {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .project[data-disabled="true"] {
@@ -491,6 +842,27 @@
       text-wrap: pretty;
     }
 
+    .quest {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: grid-template-rows 0.24s ease, opacity 0.24s ease, transform 0.24s ease;
+      color: color-mix(in oklch, var(--fg-dim), var(--accent) 24%);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .quest span {
+      overflow: hidden;
+    }
+
+    .quest b {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
     .tags {
       display: flex;
       flex-wrap: wrap;
@@ -579,6 +951,36 @@
         font-size: 13.5px;
       }
 
+      .terminal {
+        font-size: 11px;
+      }
+
+      .screen-panel {
+        min-height: 310px;
+      }
+
+      .work-entry {
+        grid-template-columns: 36px 1fr;
+      }
+
+      .work-entry .go {
+        display: none;
+      }
+
+      .kv {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .statusbar {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 14px;
+      }
+
+      .statusbar .signal {
+        justify-self: start;
+      }
+
     }
 
     /* ===== Footer ===== */
@@ -602,77 +1004,21 @@
       align-items: center;
     }
 
-    footer kbd {
-      font-family: var(--mono);
-      font-size: 10px;
-      border: 1px solid var(--line);
-      border-bottom-width: 2px;
-      border-radius: 3px;
-      padding: 1px 5px;
-      color: var(--fg-dim);
-      background: var(--bg-2);
-    }
-
-    /* ===== Help overlay ===== */
-    .help-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+    .statusbar {
+      width: 100%;
       display: grid;
-      place-items: center;
-      z-index: 50;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.18s ease;
+      grid-template-columns: repeat(3, auto) 1fr;
+      gap: 14px;
+      align-items: center;
     }
 
-    .help-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
+    .statusbar span {
+      white-space: nowrap;
     }
 
-    .help-card {
-      background: var(--bg-2);
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      padding: 24px 28px;
-      min-width: min(340px, 90vw);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--fg-dim);
-    }
-
-    .help-card h3 {
-      margin: 0 0 14px;
-      font-size: 11px;
+    .statusbar .signal {
+      justify-self: end;
       color: var(--accent);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-
-    .help-card .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 24px;
-      padding: 6px 0;
-      border-bottom: 1px dashed var(--line);
-    }
-
-    .help-card .row:last-child {
-      border-bottom: 0;
-    }
-
-    .help-card kbd {
-      font-family: var(--mono);
-      border: 1px solid var(--line);
-      border-bottom-width: 2px;
-      border-radius: 3px;
-      padding: 1px 6px;
-      color: var(--fg);
-      background: var(--bg);
     }
 
     /* reduced motion */
@@ -719,111 +1065,210 @@
         </h1>
       </div>
 
+      <section class="terminal" aria-label="interactive portfolio command line">
+        <div class="terminal-head">
+          <span>STUDIO TODO.exe</span>
+          <span id="terminalMode">mode: browse</span>
+        </div>
+        <div class="terminal-log" id="terminalLog" aria-live="polite">
+          <div class="terminal-line"><strong>type a command</strong> to browse this small portfolio interface.</div>
+          <div class="terminal-line">try: home / works / about / music / help</div>
+        </div>
+        <form class="terminal-form" id="commandForm">
+          <span class="prompt" aria-hidden="true">&gt;</span>
+          <input class="command-input" id="commandInput" type="text" autocomplete="off" spellcheck="false"
+            aria-label="portfolio command" placeholder="enter command" />
+        </form>
+        <div class="command-help" aria-label="quick commands">
+          <button class="chip" type="button" data-command="home">home</button>
+          <button class="chip" type="button" data-command="works">works</button>
+          <button class="chip" type="button" data-command="about">about</button>
+          <button class="chip" type="button" data-command="music">music</button>
+        </div>
+      </section>
+
+      <section class="screen-stage" aria-label="portfolio screen">
+        <article class="screen-panel is-active" data-screen="home">
+          <div class="screen-title">
+            <span>// HOME</span>
+            <span>ready</span>
+          </div>
+          <p class="screen-copy">
+            小さなWebサービスやゲームの形で、日常の「ちょっと面白い」を作っています。
+            コマンドを入力すると、作品やプロフィールが端末の中で切り替わります。
+          </p>
+          <dl class="kv">
+            <dt>try</dt>
+            <dd>home / works / about / music</dd>
+            <dt>controls</dt>
+            <dd>tap a chip, or type a command</dd>
+            <dt>mood</dt>
+            <dd>quiet interface, playful behavior</dd>
+          </dl>
+        </article>
+
+        <article class="screen-panel" data-screen="works" id="works">
+          <div class="screen-title">
+            <span>// WORKS</span>
+            <span>select save data</span>
+          </div>
+          <div class="screen-grid">
+            <a class="work-entry" href="https://www.seichi-map.com/" target="_blank" rel="noopener noreferrer"
+              data-sfx="row">
+              <img src="assets/seichi-favicon.ico" alt="seichi-map favicon" />
+              <span>
+                <strong>SeichiMap - 聖地マップ</strong>
+                <small>アニメや漫画の舞台を地図から探せる聖地巡礼マップ。</small>
+              </span>
+              <span class="go" aria-hidden="true">→</span>
+            </a>
+            <a class="work-entry" href="https://www.dictation-of-the-day.com/" target="_blank" rel="noopener noreferrer"
+              data-sfx="row" style="--icon-x: -2px;">
+              <img src="assets/dictation-favicon.svg" alt="dictation favicon" />
+              <span>
+                <strong>Dictation of the Day</strong>
+                <small>シンプルな英語ディクテーションタイピングゲーム。</small>
+              </span>
+              <span class="go" aria-hidden="true">→</span>
+            </a>
+            <div class="work-entry" role="group" aria-label="KOTOBA SNIPER" data-sfx="row-locked">
+              <span class="thumb" data-placeholder="true" data-label="kotoba"></span>
+              <span>
+                <strong>KOTOBA SNIPER</strong>
+                <small>ヒントから一つの単語を狙い撃つ、水平思考ワードゲーム。WIP.</small>
+              </span>
+              <span class="go" aria-hidden="true">·</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="screen-panel" data-screen="about">
+          <div class="screen-title">
+            <span>// ABOUT</span>
+            <span>whoami</span>
+          </div>
+          <p class="screen-copy">
+            honake. 企画と実装のあいだを行き来しながら、Webサービスやゲームを作っています。
+          </p>
+          <dl class="kv">
+            <dt>links</dt>
+            <dd>
+              <a href="https://x.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">x / @honake ↗</a>
+              &nbsp;&nbsp;
+              <a href="https://github.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">github /
+                @honake ↗</a>
+            </dd>
+          </dl>
+        </article>
+
+        <article class="screen-panel" data-screen="music">
+          <div class="screen-title">
+            <span>// MUSIC</span>
+            <span>open channel</span>
+          </div>
+          <p class="screen-copy">
+            作った曲や演奏した曲などをのんびりとあげているチャンネルです。
+          </p>
+          <div class="screen-grid" style="margin-top: 18px;">
+            <a class="work-entry" href="https://www.youtube.com/@y.honake" target="_blank" rel="noopener noreferrer"
+              data-sfx="link">
+              <span class="thumb" data-placeholder="true" data-label="yt"></span>
+              <span>
+                <strong>YouTube / y.honake</strong>
+                <small>music channel: sketches, sounds, and quiet fragments.</small>
+              </span>
+              <span class="go" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </article>
+      </section>
+
     </section>
 
     <!-- ===== Projects: Live ===== -->
-    <div class="section-h">
-      <span class="label">// LIVE</span>
-      <span class="count">02</span>
-    </div>
-
-    <section class="projects" aria-label="Live services">
-      <a class="project" href="https://www.seichi-map.com/" target="_blank" rel="noopener noreferrer" data-sfx="row">
-        <div class="thumb" data-label="seichi-map" data-favicon="true">
-          <img src="assets/seichi-favicon.ico" alt="seichi-map favicon" />
-        </div>
-        <div class="info">
-          <span class="num">/01 · web app</span>
-          <div class="title-row">
-            <h2 class="title">SeichiMap - 聖地マップ</h2>
-            <span class="url">seichi-map.com ↗</span>
-          </div>
-          <p class="desc">近所のコンテンツ聖地を探せる地図アプリ。アニメや漫画の舞台になった場所を、地図上から発見できます。</p>
-          <div class="tags">
-            <span>map</span><span>discovery</span><span>web</span>
-          </div>
-        </div>
-        <span class="arrow" aria-hidden="true">→</span>
-      </a>
-
-      <a class="project" href="https://www.dictation-of-the-day.com/" target="_blank" rel="noopener noreferrer"
-        data-sfx="row">
-        <div class="thumb" data-label="dictation" data-favicon="true" style="--icon-x: -2px;">
-          <img src="assets/dictation-favicon.svg" alt="dictation favicon" />
-        </div>
-        <div class="info">
-          <span class="num">/02 · web game</span>
-          <div class="title-row">
-            <h2 class="title">Dictation of the Day</h2>
-            <span class="url">dictation-of-the-day.com ↗</span>
-          </div>
-          <p class="desc">英語のディクテーション × タイピングゲーム。毎日のリスニング練習を、ゲーム感覚で続けられます。</p>
-          <div class="tags">
-            <span>english</span><span>typing</span><span>daily</span>
-          </div>
-        </div>
-        <span class="arrow" aria-hidden="true">→</span>
-      </a>
-    </section>
-
-    <!-- ===== Projects: In Development ===== -->
-    <div class="section-h">
-      <span class="label">// WIP</span>
-      <span class="count">01</span>
-    </div>
-
-    <section class="projects" aria-label="In development">
-      <div class="project" data-disabled="true" role="group" aria-label="KOTOBA SNIPER" data-sfx="row-locked">
-        <div class="thumb" data-placeholder="true" data-label="kotoba">
-          <!-- replace with: <img src="assets/kotoba-sniper.png" alt="" /> -->
-        </div>
-        <div class="info">
-          <span class="num">/03 · game</span>
-          <div class="title-row">
-            <h2 class="title">KOTOBA SNIPER</h2>
-            <span class="badge">WIP</span>
-          </div>
-          <p class="desc">概念を撃ち抜く、水平思考ワードゲーム。ヒントから一つの&ldquo;ことば&rdquo;を狙い撃つ、新感覚パズル。</p>
-          <div class="tags">
-            <span>game</span><span>wordplay</span><span>lateral-thinking</span>
-          </div>
-        </div>
-        <span class="arrow" aria-hidden="true">·</span>
+    <div class="legacy-content">
+      <div class="section-h">
+        <span class="label">// LIVE</span>
+        <span class="count">02</span>
       </div>
-    </section>
 
-    <!-- ===== Social links ===== -->
-    <div class="section-h">
-      <span class="label">// CONTACT</span>
-      <span class="count">02</span>
+      <section class="projects" aria-label="Live services">
+        <a class="project" href="https://www.seichi-map.com/" target="_blank" rel="noopener noreferrer" data-sfx="row">
+          <div class="thumb" data-label="seichi-map" data-favicon="true">
+            <img src="assets/seichi-favicon.ico" alt="seichi-map favicon" />
+          </div>
+          <div class="info">
+            <span class="num">/01 · web app</span>
+            <div class="title-row">
+              <h2 class="title">SeichiMap - 聖地マップ</h2>
+              <span class="url">seichi-map.com ↗</span>
+            </div>
+            <p class="desc">近所のコンテンツ聖地を探せる地図アプリ。アニメや漫画の舞台になった場所を、地図上から発見できます。</p>
+            <p class="quest"><span><b>quest:</b> 物語の場所を、地図の上でふらっと見つけられるようにする。</span></p>
+            <div class="tags">
+              <span>map</span><span>discovery</span><span>web</span>
+            </div>
+          </div>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="project" href="https://www.dictation-of-the-day.com/" target="_blank" rel="noopener noreferrer"
+          data-sfx="row">
+          <div class="thumb" data-label="dictation" data-favicon="true" style="--icon-x: -2px;">
+            <img src="assets/dictation-favicon.svg" alt="dictation favicon" />
+          </div>
+          <div class="info">
+            <span class="num">/02 · web game</span>
+            <div class="title-row">
+              <h2 class="title">Dictation of the Day</h2>
+              <span class="url">dictation-of-the-day.com ↗</span>
+            </div>
+            <p class="desc">英語のディクテーション × タイピングゲーム。毎日のリスニング練習を、ゲーム感覚で続けられます。</p>
+            <p class="quest"><span><b>quest:</b> 勉強を「今日も一回だけやるか」に変える、軽い習慣ゲームを作る。</span></p>
+            <div class="tags">
+              <span>english</span><span>typing</span><span>daily</span>
+            </div>
+          </div>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </section>
+
+      <!-- ===== Projects: In Development ===== -->
+      <div class="section-h">
+        <span class="label">// WIP</span>
+        <span class="count">01</span>
+      </div>
+
+      <section class="projects" aria-label="In development">
+        <div class="project" data-disabled="true" role="group" aria-label="KOTOBA SNIPER" data-sfx="row-locked">
+          <div class="thumb" data-placeholder="true" data-label="kotoba">
+            <!-- replace with: <img src="assets/kotoba-sniper.png" alt="" /> -->
+          </div>
+          <div class="info">
+            <span class="num">/03 · game</span>
+            <div class="title-row">
+              <h2 class="title">KOTOBA SNIPER</h2>
+              <span class="badge">WIP</span>
+            </div>
+            <p class="desc">概念を撃ち抜く、水平思考ワードゲーム。ヒントから一つの&ldquo;ことば&rdquo;を狙い撃つ、新感覚パズル。</p>
+            <p class="quest"><span><b>quest:</b> 言葉の輪郭を、推理と直感でじわっと当てにいく。</span></p>
+            <div class="tags">
+              <span>game</span><span>wordplay</span><span>lateral-thinking</span>
+            </div>
+          </div>
+          <span class="arrow" aria-hidden="true">·</span>
+        </div>
+      </section>
+
     </div>
-    <nav class="meta meta-bottom" aria-label="social links">
-      <a href="https://x.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">x / @honake ↗</a>
-      <a href="https://github.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">github / @honake
-        ↗</a>
-    </nav>
 
     <!-- ===== Footer ===== -->
     <footer>
-      <span>© <span id="year">2026</span> STUDIO TODO</span>
-      <span class="right">
-        <span><kbd>?</kbd></span>
+      <span class="statusbar">
+        <span>© <span id="year">2026</span> STUDIO TODO</span>
       </span>
     </footer>
   </main>
-
-  <!-- ===== Help overlay ===== -->
-  <div class="help-overlay" id="help" role="dialog" aria-modal="true" aria-label="keyboard shortcuts">
-    <div class="help-card">
-      <h3>// keyboard</h3>
-      <div class="row"><span>seichi map</span><kbd>1</kbd></div>
-      <div class="row"><span>dictation</span><kbd>2</kbd></div>
-      <div class="row"><span>kotoba sniper</span><kbd>3</kbd></div>
-      <div class="row"><span>github</span><kbd>g</kbd></div>
-      <div class="row"><span>x / twitter</span><kbd>x</kbd></div>
-      <div class="row"><span>close</span><kbd>esc</kbd></div>
-    </div>
-  </div>
 
   <script>
     // ----- year -----
@@ -959,12 +1404,175 @@
         toggleOn: () => { blip({ freq: 660, dur: 0.05, type: 'square', vol: 0.5 }); blip({ freq: 1320, dur: 0.07, type: 'square', vol: 0.5, delay: 0.06 }); },
         toggleOff: () => { blip({ freq: 1320, dur: 0.05, type: 'square', vol: 0.5 }); blip({ freq: 660, dur: 0.07, type: 'square', vol: 0.4, delay: 0.06 }); },
         key: () => blip({ freq: 1480, dur: 0.025, type: 'square', vol: 0.3 }),
+        command: () => { blip({ freq: 740, dur: 0.035, type: 'square', vol: 0.28 }); blip({ freq: 1110, dur: 0.05, type: 'triangle', vol: 0.22, delay: 0.04 }); },
       };
 
       function play(name) { const fn = sounds[name]; if (fn) fn(); }
       function isOn() { return on; }
       function set(v) { on = !!v; localStorage.setItem(KEY, on ? '1' : '0'); }
       return { play, isOn, set, ensure };
+    })();
+
+    // ----- command interface -----
+    (function () {
+      const form = document.getElementById('commandForm');
+      const input = document.getElementById('commandInput');
+      const log = document.getElementById('terminalLog');
+      const modeLabel = document.getElementById('terminalMode');
+      const screens = document.querySelectorAll('[data-screen]');
+
+      function addLine(html, animate = false) {
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.innerHTML = html;
+        log.appendChild(line);
+        while (log.children.length > 4) log.removeChild(log.firstElementChild);
+
+        if (animate) {
+          const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, null, false);
+          const nodes = [];
+          let n;
+          while ((n = walker.nextNode())) {
+            nodes.push(n);
+          }
+          const originalTexts = nodes.map(node => node.nodeValue);
+          nodes.forEach(node => node.nodeValue = '');
+
+          let charIndex = 0;
+          const totalChars = originalTexts.reduce((acc, text) => acc + text.length, 0);
+
+          function typeNext() {
+            if (charIndex < totalChars) {
+              let count = 0;
+              for (let i = 0; i < nodes.length; i++) {
+                const len = originalTexts[i].length;
+                if (charIndex >= count && charIndex < count + len) {
+                  nodes[i].nodeValue = originalTexts[i].substring(0, charIndex - count + 1);
+                  break;
+                } else if (charIndex >= count + len) {
+                  nodes[i].nodeValue = originalTexts[i];
+                }
+                count += len;
+              }
+              charIndex += 2;
+              requestAnimationFrame(typeNext);
+            } else {
+              nodes.forEach((node, i) => node.nodeValue = originalTexts[i]);
+            }
+          }
+          requestAnimationFrame(typeNext);
+        }
+      }
+
+      function playDecodeEffect(panel) {
+        const els = panel.querySelectorAll('.screen-copy, .screen-title span, .work-entry strong, .work-entry small, .kv dt, .kv dd:not(:has(a))');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+<>?/';
+        els.forEach(el => {
+          const childNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length > 0);
+          childNodes.forEach(n => {
+            const original = n.nodeValue;
+            const len = original.length;
+            let iterations = 0;
+            const maxIterations = 10 + Math.random() * 20;
+
+            function tick() {
+              let text = '';
+              const progress = iterations / maxIterations;
+              const settledCount = Math.floor(progress * len);
+
+              for (let i = 0; i < len; i++) {
+                if (original[i] === ' ' || original[i] === '\n') {
+                  text += original[i];
+                } else if (i < settledCount) {
+                  text += original[i];
+                } else {
+                  text += chars[Math.floor(Math.random() * chars.length)];
+                }
+              }
+              n.nodeValue = text;
+
+              iterations++;
+              if (iterations <= maxIterations) {
+                requestAnimationFrame(tick);
+              } else {
+                n.nodeValue = original;
+              }
+            }
+            requestAnimationFrame(tick);
+          });
+        });
+      }
+
+      function setMode(mode) {
+        document.body.dataset.mode = mode === 'browse' ? '' : mode;
+        const label = `mode: ${mode}`;
+        modeLabel.textContent = label;
+      }
+
+      function showScreen(name) {
+        screens.forEach((screen) => {
+          const isTarget = screen.dataset.screen === name;
+          if (isTarget && !screen.classList.contains('is-active')) {
+            playDecodeEffect(screen);
+          }
+          screen.classList.toggle('is-active', isTarget);
+        });
+      }
+
+      function run(raw) {
+        const command = raw.trim().toLowerCase();
+        if (!command) return;
+        addLine(`<span class="prompt">&gt;</span> ${command}`, false);
+        SFX.play('command');
+
+        if (['works', 'work', 'projects', 'ls'].includes(command)) {
+          setMode('works');
+          showScreen('works');
+          addLine('<strong>works loaded.</strong> select a save data row.', true);
+        } else if (['about', 'whoami'].includes(command)) {
+          setMode('about');
+          showScreen('about');
+          addLine('<strong>honake:</strong> planner / fullstack engineer / maker of small internet things.', true);
+        } else if (['home', 'root', 'cd'].includes(command)) {
+          setMode('browse');
+          showScreen('home');
+          addLine('<strong>home.</strong> choose a command.', true);
+        } else if (['music', 'kirinji', 'bialystocks'].includes(command)) {
+          setMode('music');
+          showScreen('music');
+          addLine('<strong>music mode.</strong> youtube channel linked.', true);
+        } else if (['help', '?'].includes(command)) {
+          showScreen('home');
+          addLine('commands: home / works / about / music / clear', true);
+        } else if (command === 'clear') {
+          log.innerHTML = '';
+          addLine('<strong>cleared.</strong> try works / about / music.', true);
+        } else {
+          addLine(`unknown command: <strong>${command}</strong>. try help.`, true);
+
+          const term = document.querySelector('.terminal');
+          term.classList.remove('error-shake');
+          void term.offsetWidth; // trigger reflow
+          term.classList.add('error-shake');
+          SFX.play('row-locked');
+        }
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        run(input.value);
+        input.value = '';
+      });
+
+      document.querySelectorAll('[data-command]').forEach((button) => {
+        button.addEventListener('click', () => {
+          run(button.dataset.command);
+          input.focus();
+        });
+      });
+
+      setMode('browse');
+      showScreen('home');
     })();
 
     // sound toggle button
@@ -1009,50 +1617,6 @@
       wrap.addEventListener('click', () => SFX.play('logo'));
     })();
 
-    // ----- Keyboard shortcuts -----
-    (function () {
-      const help = document.getElementById('help');
-      const links = {
-        '1': 'https://www.seichi-map.com/',
-        '2': 'https://www.dictation-of-the-day.com/',
-        'g': 'https://github.com/honake',
-        'x': 'https://x.com/honake',
-      };
-      document.addEventListener('keydown', (e) => {
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
-        const tag = (e.target && e.target.tagName) || '';
-        if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
-
-        if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
-          e.preventDefault();
-          SFX.play('key');
-          help.classList.toggle('open');
-          return;
-        }
-        if (e.key === 'Escape') {
-          if (help.classList.contains('open')) SFX.play('key');
-          help.classList.remove('open');
-          return;
-        }
-        const k = e.key.toLowerCase();
-        if (links[k]) {
-          SFX.play('click');
-          window.open(links[k], '_blank', 'noopener,noreferrer');
-          return;
-        }
-        if (k === '3') {
-          SFX.play('row-locked');
-          const el = document.querySelectorAll('.project')[2];
-          if (el) {
-            el.animate(
-              [{ background: 'rgba(255,255,255,0.06)' }, { background: 'transparent' }],
-              { duration: 600, easing: 'ease-out' }
-            );
-          }
-        }
-      });
-      help.addEventListener('click', () => help.classList.remove('open'));
-    })();
   </script>
 </body>
 
