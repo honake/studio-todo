@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
     rel="stylesheet" />
   <style>
     :root {
@@ -23,7 +23,7 @@
       /* warm amber */
       --accent-dim: oklch(0.55 0.10 75);
       --rose: oklch(0.70 0.16 338);
-      --sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      --sans: 'Zen Maru Gothic', sans-serif;
       --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
@@ -68,6 +68,11 @@
     body[data-mode="about"] {
       --accent: oklch(0.74 0.13 145);
       --accent-dim: oklch(0.52 0.09 145);
+    }
+
+    body[data-mode="articles"] {
+      --accent: oklch(0.78 0.14 38);
+      --accent-dim: oklch(0.55 0.10 38);
     }
 
     body[data-mode="card"] {
@@ -337,8 +342,10 @@
     .screen-stage {
       width: min(760px, 100%);
       display: grid;
+      position: relative;
       text-align: left;
       font-family: var(--mono);
+      align-items: start;
     }
 
     .screen-panel {
@@ -353,14 +360,21 @@
       opacity: 0;
       transform: translateY(8px) scale(0.99);
       pointer-events: none;
-      transition: opacity 0.22s ease, transform 0.22s ease;
+      transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
       overflow: hidden;
+
+      visibility: hidden;
+      position: absolute;
+      top: 0; left: 0; right: 0;
     }
 
     .screen-panel.is-active {
       opacity: 1;
       transform: translateY(0) scale(1);
       pointer-events: auto;
+
+      visibility: visible;
+      position: relative;
     }
 
     .screen-title {
@@ -384,7 +398,7 @@
       font-family: var(--sans);
       font-size: 15px;
       line-height: 1.8;
-      max-width: 62ch;
+      max-width: 100%;
       margin: 0;
       text-wrap: pretty;
     }
@@ -445,10 +459,93 @@
       margin-bottom: 3px;
     }
 
+    .platform-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1px solid currentColor;
+      opacity: 0.8;
+    }
+    .platform-badge.note { color: #2cb696; background: rgba(44, 182, 150, 0.1); }
+    .platform-badge.zenn { color: #3ea8ff; background: rgba(62, 168, 255, 0.1); }
+
     .work-entry small {
       color: color-mix(in oklch, var(--fg-dim), var(--fg) 16%);
       font-size: 10.5px;
       line-height: 1.5;
+    }
+
+    .work-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .work-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .genre-badge {
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid currentColor;
+      text-transform: uppercase;
+      opacity: 0.8;
+      transform: translateY(-1px);
+    }
+    .genre-badge.web-app { color: #5bc0be; background: rgba(91, 192, 190, 0.1); }
+    .genre-badge.game { color: #ff9f1c; background: rgba(255, 159, 28, 0.1); }
+
+    .work-tags {
+      display: flex;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--fg-dim);
+      opacity: 0.7;
+      margin-top: 3px;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .page-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      color: var(--fg-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+    .page-btn:hover {
+      border-color: var(--fg-dim);
+      color: var(--fg);
+    }
+    .page-btn.active {
+      background: color-mix(in oklch, var(--accent) 15%, transparent);
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .work-entry .go {
@@ -457,6 +554,83 @@
     }
 
     .work-entry:hover .go {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .article-entry {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 14px;
+      color: var(--fg);
+      text-decoration: none;
+      background: color-mix(in oklch, var(--bg-card), transparent 60%);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+      cursor: pointer;
+    }
+    .article-entry:hover {
+      background: var(--bg-card);
+      border-color: color-mix(in oklch, var(--border), var(--fg) 10%);
+      transform: translateY(-1px);
+    }
+    .article-entry .thumb-16-9 {
+      width: 96px;
+      height: 54px;
+      border-radius: 4px;
+      background: var(--bg-card);
+      position: relative;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+    }
+    .article-entry .thumb-16-9 img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .article-entry .thumb-16-9[data-placeholder="true"]::after {
+      content: attr(data-label);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--fg-dim);
+      position: absolute;
+    }
+    .article-entry .thumb-16-9[data-label="ZENN"] { border-color: rgba(62, 168, 255, 0.4); }
+    .article-entry .thumb-16-9[data-label="NOTE"] { border-color: rgba(44, 182, 150, 0.4); }
+    
+    .article-entry > span:nth-of-type(1) {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .article-entry strong {
+      font-weight: 500;
+      font-size: 13.5px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+    .article-entry small {
+      color: color-mix(in oklch, var(--fg-dim), var(--fg) 16%);
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+    .article-entry .go {
+      color: var(--fg-faint);
+      transition: transform 0.18s ease, color 0.18s ease;
+    }
+    .article-entry:hover .go {
       color: var(--accent);
       transform: translateX(3px);
     }
@@ -1068,11 +1242,11 @@
       <section class="terminal" aria-label="interactive portfolio command line">
         <div class="terminal-head">
           <span>STUDIO TODO.exe</span>
-          <span id="terminalMode">mode: browse</span>
+          <span id="terminalMode">mode: about</span>
         </div>
         <div class="terminal-log" id="terminalLog" aria-live="polite">
           <div class="terminal-line"><strong>type a command</strong> to browse this small portfolio interface.</div>
-          <div class="terminal-line">try: home / works / about / music / help</div>
+          <div class="terminal-line">try: about / works / music / articles / help</div>
         </div>
         <form class="terminal-form" id="commandForm">
           <span class="prompt" aria-hidden="true">&gt;</span>
@@ -1080,91 +1254,64 @@
             aria-label="portfolio command" placeholder="enter command" />
         </form>
         <div class="command-help" aria-label="quick commands">
-          <button class="chip" type="button" data-command="home">home</button>
-          <button class="chip" type="button" data-command="works">works</button>
           <button class="chip" type="button" data-command="about">about</button>
+          <button class="chip" type="button" data-command="works">works</button>
           <button class="chip" type="button" data-command="music">music</button>
+          <button class="chip" type="button" data-command="articles">articles</button>
         </div>
       </section>
 
       <section class="screen-stage" aria-label="portfolio screen">
-        <article class="screen-panel is-active" data-screen="home">
+        <article class="screen-panel is-active" data-screen="about">
           <div class="screen-title">
-            <span>// HOME</span>
-            <span>ready</span>
+            <span>// ABOUT</span>
+            <span>character status</span>
           </div>
           <p class="screen-copy">
-            小さなWebサービスやゲームの形で、日常の「ちょっと面白い」を作っています。
-            コマンドを入力すると、作品やプロフィールが端末の中で切り替わります。
+            Engineer & Planner with AI proficiency.<br>
+            This space serves as a log of my independent developments and personal internet activities, exploring playful ideas through code and design.
           </p>
-          <dl class="kv">
-            <dt>try</dt>
-            <dd>home / works / about / music</dd>
-            <dt>controls</dt>
-            <dd>tap a chip, or type a command</dd>
-            <dt>mood</dt>
-            <dd>quiet interface, playful behavior</dd>
+
+          <dl class="kv" style="margin-top: 24px;">
+            <dt>education</dt>
+            <dd>
+              M.S. Quantitative Finance — The University of Tokyo<br>
+              B.S. Mathematics, Probability Theory — Kyoto University
+            </dd>
+
+            <dt>certificates</dt>
+            <dd>
+              TOEFL iBT 103<br>
+              Kaggle Bronze Medal (Recommendation Algorithm)<br>
+              Institute of Actuaries of Japan (Student Member)
+            </dd>
+
+            <dt>links</dt>
+            <dd>
+              <a href="https://x.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">x / @honake ↗</a>
+              &nbsp;&nbsp;
+              <a href="https://github.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">github / @honake ↗</a>
+            </dd>
           </dl>
         </article>
 
         <article class="screen-panel" data-screen="works" id="works">
           <div class="screen-title">
             <span>// WORKS</span>
-            <span>select save data</span>
-          </div>
-          <div class="screen-grid">
-            <a class="work-entry" href="https://www.seichi-map.com/" target="_blank" rel="noopener noreferrer"
-              data-sfx="row">
-              <img src="assets/seichi-favicon.ico" alt="seichi-map favicon" />
-              <span>
-                <strong>SeichiMap - 聖地マップ</strong>
-                <small>アニメや漫画の舞台を地図から探せる聖地巡礼マップ。</small>
-              </span>
-              <span class="go" aria-hidden="true">→</span>
-            </a>
-            <a class="work-entry" href="https://www.dictation-of-the-day.com/" target="_blank" rel="noopener noreferrer"
-              data-sfx="row" style="--icon-x: -2px;">
-              <img src="assets/dictation-favicon.svg" alt="dictation favicon" />
-              <span>
-                <strong>Dictation of the Day</strong>
-                <small>シンプルな英語ディクテーションタイピングゲーム。</small>
-              </span>
-              <span class="go" aria-hidden="true">→</span>
-            </a>
-            <div class="work-entry" role="group" aria-label="KOTOBA SNIPER" data-sfx="row-locked">
-              <span class="thumb" data-placeholder="true" data-label="kotoba"></span>
-              <span>
-                <strong>KOTOBA SNIPER</strong>
-                <small>ヒントから一つの単語を狙い撃つ、水平思考ワードゲーム。WIP.</small>
-              </span>
-              <span class="go" aria-hidden="true">·</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="screen-panel" data-screen="about">
-          <div class="screen-title">
-            <span>// ABOUT</span>
-            <span>whoami</span>
+            <span>unlocked achievements</span>
           </div>
           <p class="screen-copy">
-            honake. 企画と実装のあいだを行き来しながら、Webサービスやゲームを作っています。
+            これまでに制作したWebアプリやゲーム、個人的なプロジェクトの一覧です。
           </p>
-          <dl class="kv">
-            <dt>links</dt>
-            <dd>
-              <a href="https://x.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">x / @honake ↗</a>
-              &nbsp;&nbsp;
-              <a href="https://github.com/honake" target="_blank" rel="noopener noreferrer" data-sfx="link">github /
-                @honake ↗</a>
-            </dd>
-          </dl>
+          <div class="screen-grid" id="worksGrid" style="margin-top: 18px;">
+            <div class="terminal-line" id="worksLoading">loading...</div>
+          </div>
         </article>
 
         <article class="screen-panel" data-screen="music">
           <div class="screen-title">
             <span>// MUSIC</span>
-            <span>open channel</span>
+            <span>sound test</span>
           </div>
           <p class="screen-copy">
             作った曲や演奏した曲などをのんびりとあげているチャンネルです。
@@ -1180,6 +1327,20 @@
               <span class="go" aria-hidden="true">→</span>
             </a>
           </div>
+        </article>
+
+        <article class="screen-panel" data-screen="articles">
+          <div class="screen-title">
+            <span>// ARTICLES</span>
+            <span>journal</span>
+          </div>
+          <p class="screen-copy">
+            ZennとNoteに投稿した最新の記事です。
+          </p>
+          <div class="screen-grid" id="articlesGrid" style="margin-top: 18px;">
+            <p class="screen-copy" style="font-size: 13px; color: var(--fg-faint);" id="articlesLoading">Loading articles...</p>
+          </div>
+          <div class="pagination" id="articlesPagination" style="display: none;"></div>
         </article>
       </section>
 
@@ -1270,6 +1431,7 @@
     </footer>
   </main>
 
+  <script src="works.js"></script>
   <script>
     // ----- year -----
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -1529,24 +1691,26 @@
           setMode('works');
           showScreen('works');
           addLine('<strong>works loaded.</strong> select a save data row.', true);
-        } else if (['about', 'whoami'].includes(command)) {
+          loadWorks();
+        } else if (['about', 'whoami', 'home', 'root', 'cd'].includes(command)) {
           setMode('about');
           showScreen('about');
-          addLine('<strong>honake:</strong> planner / fullstack engineer / maker of small internet things.', true);
-        } else if (['home', 'root', 'cd'].includes(command)) {
-          setMode('browse');
-          showScreen('home');
-          addLine('<strong>home.</strong> choose a command.', true);
+          addLine('<strong>about.</strong> loaded profile & experience.', true);
         } else if (['music', 'kirinji', 'bialystocks'].includes(command)) {
           setMode('music');
           showScreen('music');
           addLine('<strong>music mode.</strong> youtube channel linked.', true);
+        } else if (['articles', 'article', 'blog', 'note', 'zenn'].includes(command)) {
+          setMode('articles');
+          showScreen('articles');
+          addLine('<strong>articles.</strong> loading recent posts.', true);
+          loadArticles();
         } else if (['help', '?'].includes(command)) {
-          showScreen('home');
-          addLine('commands: home / works / about / music / clear', true);
+          showScreen('about');
+          addLine('commands: about / works / music / articles / clear', true);
         } else if (command === 'clear') {
           log.innerHTML = '';
-          addLine('<strong>cleared.</strong> try works / about / music.', true);
+          addLine('<strong>cleared.</strong> try about / works / music.', true);
         } else {
           addLine(`unknown command: <strong>${command}</strong>. try help.`, true);
 
@@ -1571,9 +1735,225 @@
         });
       });
 
-      setMode('browse');
-      showScreen('home');
+      setMode('about');
+      showScreen('about');
     })();
+
+    // ----- Works fetcher -----
+    let worksLoaded = false;
+    async function loadWorks() {
+      if (worksLoaded) return;
+      worksLoaded = true;
+      const grid = document.getElementById('worksGrid');
+      const loader = document.getElementById('worksLoading');
+      
+      try {
+        const worksData = window.WORKS_DATA || [];
+        
+        grid.innerHTML = '';
+        worksData.forEach(item => {
+          const a = document.createElement(item.url ? 'a' : 'div');
+          a.className = 'work-entry';
+          if (item.url) {
+            a.href = item.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.dataset.sfx = 'row';
+          } else {
+            a.dataset.sfx = 'row-locked';
+            a.style.cursor = 'default';
+          }
+          
+          let imgHtml = '';
+          if (item.image) {
+            const offset = item.iconOffsetX ? ` style="--icon-x: ${item.iconOffsetX};"` : '';
+            imgHtml = `<img src="${item.image}" alt="${item.id} thumbnail"${offset} />`;
+          } else {
+            imgHtml = `<span class="thumb" data-placeholder="true" data-label="${item.thumbLabel || item.id}"></span>`;
+          }
+
+          const tagsHtmlArray = item.tags ? item.tags.map(t => `<span>#${t}</span>`) : [];
+          
+          const genreClass = item.genre ? item.genre.replace(/\s+/g, '-') : 'default';
+          const genreHtml = item.genre ? `<span class="genre-badge ${genreClass}">${item.genre}</span>` : '';
+          
+          if (genreHtml) tagsHtmlArray.unshift(genreHtml);
+          const tagsHtml = tagsHtmlArray.length > 0 ? `<div class="work-tags" style="align-items: center;">${tagsHtmlArray.join('')}</div>` : '';
+
+          a.innerHTML = `
+            ${imgHtml}
+            <div class="work-info">
+              <div class="work-header">
+                <strong>${item.title}</strong>
+              </div>
+              <small>${item.description}</small>
+              ${tagsHtml}
+            </div>
+            <span class="go" aria-hidden="true">${item.url ? '→' : '·'}</span>
+          `;
+          grid.appendChild(a);
+        });
+
+        // re-attach sfx
+        grid.querySelectorAll('.work-entry').forEach(el => {
+          el.addEventListener('mouseenter', () => SFX.play('hover'));
+          el.addEventListener('click', () => {
+            if(el.dataset.sfx === 'row') SFX.play('row');
+            if(el.dataset.sfx === 'row-locked') SFX.play('row-locked');
+          });
+        });
+
+      } catch (e) {
+        loader.textContent = "Failed to load works.";
+        worksLoaded = false;
+      }
+    }
+
+    // ----- Articles fetcher -----
+    let articlesLoaded = false;
+    async function loadArticles() {
+      if (articlesLoaded) return;
+      articlesLoaded = true;
+      const grid = document.getElementById('articlesGrid');
+      const loader = document.getElementById('articlesLoading');
+      
+      try {
+        const [zennRes, noteRes] = await Promise.all([
+          fetch('https://api.rss2json.com/v1/api.json?rss_url=https://zenn.dev/honake/feed'),
+          fetch('https://api.rss2json.com/v1/api.json?rss_url=https://note.com/honake/rss')
+        ]);
+        
+        const zennData = await zennRes.json();
+        const noteData = await noteRes.json();
+        
+        let allArticles = [];
+        
+        if (zennData.status === 'ok') {
+          zennData.items.forEach(item => {
+            allArticles.push({
+              title: item.title,
+              link: item.link,
+              date: new Date(item.pubDate),
+              platform: 'zenn',
+              label: 'ZENN',
+              image: item.enclosure && item.enclosure.link ? item.enclosure.link : null
+            });
+          });
+        }
+        
+        if (noteData.status === 'ok') {
+          noteData.items.forEach(item => {
+            allArticles.push({
+              title: item.title,
+              link: item.link,
+              date: new Date(item.pubDate),
+              platform: 'note',
+              label: 'NOTE',
+              image: null // Note RSS from rss2json drops media:thumbnail, fetch later
+            });
+          });
+        }
+        
+        allArticles.sort((a, b) => b.date - a.date);
+        
+        if (allArticles.length === 0) {
+          loader.textContent = "No articles found.";
+          return;
+        }
+        
+        window.allArticlesData = allArticles;
+        renderArticlesPage(1);
+        
+      } catch (e) {
+        loader.textContent = "Failed to load articles.";
+        articlesLoaded = false;
+      }
+    }
+
+    let currentArticlesPage = 1;
+    const articlesPerPage = 5;
+
+    function renderArticlesPage(page) {
+      currentArticlesPage = page;
+      const grid = document.getElementById('articlesGrid');
+      const paginator = document.getElementById('articlesPagination');
+      grid.innerHTML = '';
+      
+      const allArticles = window.allArticlesData;
+      const totalPages = Math.ceil(allArticles.length / articlesPerPage);
+      const start = (page - 1) * articlesPerPage;
+      const end = start + articlesPerPage;
+      const pageArticles = allArticles.slice(start, end);
+      
+      pageArticles.forEach(item => {
+        const a = document.createElement('a');
+        a.className = 'article-entry';
+        a.href = item.link;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.dataset.sfx = 'link';
+        
+        const dateStr = item.date.toLocaleDateString('en-CA');
+        
+        let imgHtml = `<div class="thumb-16-9" data-placeholder="true" data-label="${item.label}"></div>`;
+        if (item.image) {
+          imgHtml = `<div class="thumb-16-9" data-label="${item.label}"><img src="${item.image}" alt="thumbnail" /></div>`;
+        }
+        
+        a.innerHTML = `
+          ${imgHtml}
+          <span>
+            <strong>${item.title}</strong>
+            <small><span class="platform-badge ${item.platform}">${item.label}</span>${dateStr}</small>
+          </span>
+          <span class="go" aria-hidden="true">→</span>
+        `;
+        grid.appendChild(a);
+        
+        // Async fetch OGP for Note via Microlink
+        if (!item.image && item.platform === 'note') {
+          const thumbDiv = a.querySelector('.thumb-16-9');
+          fetch(`https://api.microlink.io/?url=${encodeURIComponent(item.link)}&filter=image`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.status === 'success' && data.data && data.data.image && data.data.image.url) {
+                const img = document.createElement('img');
+                img.src = data.data.image.url;
+                img.alt = "thumbnail";
+                thumbDiv.appendChild(img);
+                thumbDiv.removeAttribute('data-placeholder');
+              }
+            }).catch(() => {});
+        }
+      });
+      
+      // attach sfx event to new links
+      grid.querySelectorAll('a[data-sfx="link"]').forEach(link => {
+        link.addEventListener('click', () => SFX.play('link'));
+        link.addEventListener('mouseenter', () => SFX.play('hover'));
+      });
+
+      // render pagination
+      if (totalPages > 1) {
+        paginator.style.display = 'flex';
+        paginator.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement('button');
+          btn.className = `page-btn ${i === page ? 'active' : ''}`;
+          btn.textContent = i;
+          btn.addEventListener('click', () => {
+            if (i !== currentArticlesPage) {
+              SFX.play('click');
+              renderArticlesPage(i);
+            }
+          });
+          btn.addEventListener('mouseenter', () => SFX.play('hover'));
+          paginator.appendChild(btn);
+        }
+      } else {
+        paginator.style.display = 'none';
+      }
+    }
 
     // sound toggle button
     (function () {
