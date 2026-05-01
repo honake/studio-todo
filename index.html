@@ -104,6 +104,34 @@
       mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
     }
 
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.56;
+      mix-blend-mode: screen;
+    }
+
+    .ambient-lines {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, transparent 0 48%, rgba(255, 255, 255, 0.035) 50%, transparent 52%),
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 9px);
+      mask-image: radial-gradient(circle at 50% 42%, black 0 34%, transparent 72%);
+      animation: scanDrift 11s linear infinite;
+    }
+
+    @keyframes scanDrift {
+      from { transform: translateY(-18px); }
+      to { transform: translateY(18px); }
+    }
+
     main {
       position: relative;
       z-index: 1;
@@ -216,36 +244,79 @@
     }
 
     .logo-wrap {
-      width: clamp(112px, 16vw, 160px);
-      aspect-ratio: 1 / 1;
+      width: min(760px, 100%);
+      aspect-ratio: 1468 / 740;
       position: relative;
-      cursor: default;
-      perspective: 800px;
+      cursor: pointer;
+    }
+
+    .logo-wrap:focus {
+      outline: none;
     }
 
     .logo-wrap img {
       width: 100%;
       height: 100%;
       display: block;
-      transform: translate3d(var(--lx, 0px), var(--ly, 0px), 0) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
-      transition: transform 0.25s cubic-bezier(.2, .7, .2, 1);
-      filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.04));
+      object-fit: contain;
+      filter: drop-shadow(0 0 28px rgba(255, 255, 255, 0.08));
+      transition: filter 0.2s ease;
     }
 
-    /* ASCII halo when hovered */
-    .logo-wrap::after {
+    .logo-wrap:hover img {
+      filter: drop-shadow(0 0 34px rgba(255, 255, 255, 0.12));
+    }
+
+    .todo-bubble {
+      position: absolute;
+      top: 8%;
+      right: 0%;
+      width: min(292px, 43%);
+      min-height: 78px;
+      display: grid;
+      place-items: center;
+      padding: 16px 22px 17px;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 54% 46% 50% 50% / 52% 56% 44% 48%;
+      background: color-mix(in oklch, var(--bg), black 20% / 0.72);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: clamp(10px, 1.25vw, 13px);
+      line-height: 1.45;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(5px) rotate(-1.2deg) scale(0.98);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+    }
+
+    .todo-bubble::before {
       content: "";
       position: absolute;
-      inset: -6%;
-      border: 1px dashed var(--fg-faint);
-      border-radius: 4px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      inset: 4px 5px 5px 4px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      border-radius: 48% 52% 54% 46% / 56% 48% 52% 44%;
       pointer-events: none;
     }
 
-    .logo-wrap:hover::after {
+    .todo-bubble::after {
+      content: "";
+      position: absolute;
+      left: 27%;
+      bottom: -17px;
+      width: 26px;
+      height: 24px;
+      border-right: 3px solid rgba(255, 255, 255, 0.9);
+      border-bottom: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 2px 0 12px 0;
+      background: inherit;
+      transform: rotate(42deg) skew(8deg);
+    }
+
+    .todo-bubble.is-visible {
       opacity: 1;
+      transform: translateY(0) rotate(-1.2deg) scale(1);
     }
 
     .intro {
@@ -1209,6 +1280,8 @@
 </head>
 
 <body>
+  <canvas class="ambient-canvas" id="ambientCanvas" aria-hidden="true"></canvas>
+  <div class="ambient-lines" aria-hidden="true"></div>
   <div class="grid-bg" aria-hidden="true"></div>
 
   <main>
@@ -1226,18 +1299,12 @@
       </span>
     </header>
 
-    <!-- ===== Hero ===== -->
-    <section class="hero">
-      <div class="logo-wrap" id="logoWrap" aria-hidden="false">
-        <img src="assets/logo.png" alt="STUDIO TODO logo" id="logo" draggable="false" />
-      </div>
-
-      <div class="intro">
-        <h1>
-          <span id="hello">Hello,</span> I&rsquo;m <span class="accent">honake</span>.<span class="caret"
-            aria-hidden="true"></span>
-        </h1>
-      </div>
+      <!-- ===== Hero ===== -->
+      <section class="hero">
+        <div class="logo-wrap" id="logoWrap" role="button" tabindex="0" aria-label="show a thought from TODO">
+          <img src="assets/studio-todo-hero.png" alt="STUDIO TODO logo" id="logo" draggable="false" />
+          <span class="todo-bubble" id="todoBubble" aria-live="polite"></span>
+        </div>
 
       <section class="terminal" aria-label="interactive portfolio command line">
         <div class="terminal-head">
@@ -1453,6 +1520,7 @@
     // ----- "Hello," / "こんにちは," / "안녕," cycler (subtle) -----
     (function () {
       const el = document.getElementById('hello');
+      if (!el) return;
       const phrases = ['Hello,', 'こんにちは,', 'やあ,', 'Hi,'];
       let i = 0;
       setInterval(() => {
@@ -1467,22 +1535,168 @@
       el.style.display = 'inline-block';
     })();
 
-    // ----- logo drift -----
+    // ----- TODO speech bubble -----
     (function () {
       const wrap = document.getElementById('logoWrap');
-      if (!wrap) return;
-      wrap.addEventListener('mousemove', (e) => {
-        const rect = wrap.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        wrap.style.setProperty('--lx', `${x * 5}px`);
-        wrap.style.setProperty('--ly', `${y * 5}px`);
-        wrap.style.setProperty('--rx', `${x * 9}deg`);
-        wrap.style.setProperty('--ry', `${y * -9}deg`);
+      const bubble = document.getElementById('todoBubble');
+      if (!wrap || !bubble) return;
+
+      const lines = [
+        "Praise the Sun!",
+        "You Died. Snack retry?",
+        "Rise, Tarnished. Lunch awaits.",
+        "It's dangerous to code alone.",
+        "The cake is a lie.",
+        "War never changes. CSS does.",
+        "Stay awhile and listen.",
+        "Do a barrel roll.",
+        "Kept you waiting, huh?",
+        "Hey! Listen! I'm hungry.",
+        "But thou must ship.",
+        "A slime draws near.",
+        "Victory fanfare, quietly.",
+        "I need healing. And tea.",
+        "May my heart be my guiding key.",
+        "No king rules forever.",
+        "Would you kindly bring snacks?",
+        "Snake? Snack? Snaaaack!",
+        "Hadouken the backlog.",
+        "The princess is in another deploy.",
+        "Finish him? After lunch.",
+        "Praise the tiny commit.",
+        "Try snack, then try again.",
+        "The final boss is naming things.",
+        "My limit break is a nap.",
+        "I saved before touching CSS.",
+        "This quest needs more tea.",
+        "Please insert fish to continue.",
+        "Happiness is a warm keyboard.",
+        "No thoughts, only clean diffs.",
+      ];
+
+      let last = -1;
+      let hideTimer = 0;
+
+      function showLine() {
+        let next = Math.floor(Math.random() * lines.length);
+        if (next === last) next = (next + 1) % lines.length;
+        last = next;
+        bubble.textContent = lines[next];
+        bubble.classList.remove('is-visible');
+        void bubble.offsetWidth;
+        bubble.classList.add('is-visible');
+        window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(() => bubble.classList.remove('is-visible'), 4200);
+        SFX.play('logo');
+      }
+
+      wrap.addEventListener('click', showLine);
+      wrap.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          showLine();
+        }
       });
-      wrap.addEventListener('mouseleave', () => {
-        ['--lx', '--ly', '--rx', '--ry'].forEach(prop => wrap.style.removeProperty(prop));
-      });
+    })();
+
+    // ----- ambient background -----
+    (function () {
+      const canvas = document.getElementById('ambientCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let dpr = 1;
+      let width = 0;
+      let height = 0;
+      let nodes = [];
+      let raf = 0;
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.max(22, Math.min(54, Math.floor(width / 34)));
+        nodes = Array.from({ length: count }, (_, i) => ({
+          x: (i / count) * width + Math.random() * 70,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.16,
+          vy: 0.05 + Math.random() * 0.22,
+          r: 1 + Math.random() * 1.8,
+        }));
+      }
+
+      function draw(t) {
+        ctx.clearRect(0, 0, width, height);
+        const cx = width * 0.5;
+        const cy = height * 0.38;
+        const pulse = Math.sin(t * 0.0006) * 18;
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.055)';
+        ctx.lineWidth = 1;
+        for (let r = 120; r < Math.max(width, height); r += 130) {
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, r + pulse, (r + pulse) * 0.44, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        nodes.forEach((node, i) => {
+          node.x += node.vx;
+          node.y += node.vy;
+          if (node.y > height + 20) node.y = -20;
+          if (node.x < -30) node.x = width + 30;
+          if (node.x > width + 30) node.x = -30;
+
+          ctx.fillStyle = 'rgba(255,255,255,0.16)';
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let j = i + 1; j < nodes.length; j++) {
+            const other = nodes[j];
+            const dx = other.x - node.x;
+            const dy = other.y - node.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 150) {
+              ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 150) * 0.11})`;
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(other.x, other.y);
+              ctx.stroke();
+            }
+          }
+        });
+
+        const sweep = ((t * 0.035) % (height + 260)) - 130;
+        const grad = ctx.createLinearGradient(0, sweep - 80, 0, sweep + 80);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, 'rgba(255,255,255,0.085)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(width * 0.08, sweep);
+        ctx.bezierCurveTo(width * 0.28, sweep + 46, width * 0.66, sweep - 58, width * 0.92, sweep + 20);
+        ctx.stroke();
+        ctx.restore();
+
+        if (!reduced.matches) raf = requestAnimationFrame(draw);
+      }
+
+      function start() {
+        cancelAnimationFrame(raf);
+        resize();
+        draw(performance.now());
+      }
+
+      window.addEventListener('resize', start);
+      reduced.addEventListener?.('change', start);
+      start();
     })();
 
 
@@ -1985,16 +2199,6 @@
           SFX.play(kind);
         });
       });
-      // logo arpeggio on hover
-      const wrap = document.getElementById('logoWrap');
-      let armed = true;
-      wrap.addEventListener('mouseenter', () => {
-        if (!armed) return;
-        armed = false;
-        SFX.play('logo');
-        setTimeout(() => armed = true, 600);
-      });
-      wrap.addEventListener('click', () => SFX.play('logo'));
     })();
 
   </script>
