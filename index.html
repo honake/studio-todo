@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&family=Yomogi&family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
     rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
   <style>
     :root {
       --bg: #13171f;
@@ -1808,24 +1809,6 @@
       setInterval(tick, 1000);
     })();
 
-    // ----- "Hello," / "こんにちは," / "안녕," cycler (subtle) -----
-    (function () {
-      const el = document.getElementById('hello');
-      if (!el) return;
-      const phrases = ['Hello,', 'こんにちは,', 'やあ,', 'Hi,'];
-      let i = 0;
-      setInterval(() => {
-        i = (i + 1) % phrases.length;
-        el.style.opacity = '0';
-        setTimeout(() => {
-          el.textContent = phrases[i];
-          el.style.opacity = '1';
-        }, 220);
-      }, 4200);
-      el.style.transition = 'opacity 0.22s ease';
-      el.style.display = 'inline-block';
-    })();
-
     // ----- TODO speech bubble -----
     (function () {
       const wrap = document.getElementById('logoWrap');
@@ -1839,14 +1822,43 @@
       let last = -1;
       let hideTimer = 0;
 
+      function scrambleText(element, newText) {
+        if (!window.anime) {
+          element.textContent = newText;
+          return;
+        }
+        const chars = '!<>-_/[]{}—=+*^?#_';
+        const oldText = element.textContent || '';
+        const length = Math.max(oldText.length, newText.length);
+        const obj = { p: 0 };
+        
+        anime({
+          targets: obj,
+          p: 1,
+          easing: 'easeOutQuad',
+          duration: 600,
+          update: function() {
+            let result = '';
+            for (let j = 0; j < length; j++) {
+              if (j < obj.p * length) {
+                result += newText[j] || '';
+              } else {
+                result += chars[Math.floor(Math.random() * chars.length)];
+              }
+            }
+            element.textContent = result;
+          }
+        });
+      }
+
       function showLine() {
         let next = Math.floor(Math.random() * lines.length);
         if (next === last) next = (next + 1) % lines.length;
         last = next;
-        bubble.textContent = lines[next];
-        bubble.classList.remove('is-visible');
-        void bubble.offsetWidth;
+        
         bubble.classList.add('is-visible');
+        scrambleText(bubble, lines[next]);
+        
         window.clearTimeout(hideTimer);
         hideTimer = window.setTimeout(() => bubble.classList.remove('is-visible'), 4200);
         SFX.play('logo');
@@ -2162,39 +2174,45 @@
       function playDecodeEffect(panel) {
         const els = panel.querySelectorAll('.screen-copy, .screen-title span, .work-entry strong, .work-entry small, .kv dt, .kv dd:not(:has(a))');
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+<>?/';
+        
+        let delayIndex = 0;
         els.forEach(el => {
           const childNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length > 0);
-          childNodes.forEach(n => {
-            const original = n.nodeValue;
-            const len = original.length;
-            let iterations = 0;
-            const maxIterations = 10 + Math.random() * 20;
-
-            function tick() {
-              let text = '';
-              const progress = iterations / maxIterations;
-              const settledCount = Math.floor(progress * len);
-
-              for (let i = 0; i < len; i++) {
-                if (original[i] === ' ' || original[i] === '\n') {
-                  text += original[i];
-                } else if (i < settledCount) {
-                  text += original[i];
-                } else {
-                  text += chars[Math.floor(Math.random() * chars.length)];
-                }
+          if (childNodes.length > 0) {
+            childNodes.forEach(n => {
+              const original = n.nodeValue;
+              const len = original.length;
+              const obj = { p: 0 };
+  
+              if (window.anime) {
+                anime({
+                  targets: obj,
+                  p: 1,
+                  easing: 'easeOutQuad',
+                  duration: 500 + Math.random() * 300,
+                  delay: delayIndex * 30,
+                  update: function() {
+                    let text = '';
+                    const settledCount = Math.floor(obj.p * len);
+                    for (let i = 0; i < len; i++) {
+                      if (original[i] === ' ' || original[i] === '\n') {
+                        text += original[i];
+                      } else if (i < settledCount) {
+                        text += original[i];
+                      } else {
+                        text += chars[Math.floor(Math.random() * chars.length)];
+                      }
+                    }
+                    n.nodeValue = text;
+                  },
+                  complete: function() {
+                    n.nodeValue = original;
+                  }
+                });
               }
-              n.nodeValue = text;
-
-              iterations++;
-              if (iterations <= maxIterations) {
-                requestAnimationFrame(tick);
-              } else {
-                n.nodeValue = original;
-              }
-            }
-            requestAnimationFrame(tick);
-          });
+            });
+            delayIndex++;
+          }
         });
       }
 
