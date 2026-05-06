@@ -1,5 +1,14 @@
 window.WORKS_DATA = [
   {
+    "id": "steam",
+    "title": "Steam生態系診断 - Steam 16 Personalities -",
+    "description": "Steamの公開情報を読み込んで、16のゲーマータイプに分類する診断サービスです。",
+    "url": "https://steam-sindan.vercel.app/",
+    "image": "assets/steam-16-personalities-icon-f6.png",
+    "genre": "web app",
+    "tags": ["gemini", "api"]
+  },
+  {
     "id": "seichi",
     "title": "SeichiMap - 聖地マップ",
     "description": "アニメや漫画の舞台を地図から探せる聖地巡礼マップ。",
