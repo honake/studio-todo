@@ -1,5 +1,14 @@
 window.WORKS_DATA = [
   {
+    "id": "nabeatsu-calculator",
+    "title": "ナベアツ電卓: NABEATSU CALCULATOR",
+    "description": "答えが3の倍数、または3を含む数字になると、電卓がアホになります。🔊 音あり推奨。",
+    "url": "https://nabeatsu-calculator.vercel.app/",
+    "image": "assets/nabeatsu-calculator-icon.svg",
+    "genre": "web app",
+    "tags": ["javascript", "audio", "animation"]
+  },
+  {
     "id": "steam",
     "title": "Steam生態系診断 - Steam 16 Personalities -",
     "description": "Steamの公開情報を読み込んで、16のゲーマータイプに分類する診断サービスです。",
